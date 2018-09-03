@@ -9,8 +9,13 @@ const check = require('../libs/checkLib')
 const token = require('../libs/tokenLib')
 const AuthModel = mongoose.model('Auth')
 
+/** nodemailer for sending mails on user signup */
+const nodemailer = require('nodemailer')
+
+
 /* Models */
 const UserModel = mongoose.model('User')
+
 
 
 /* Get all user Details */
@@ -179,6 +184,21 @@ let signUpFunction = (req, res) => {
             res.send(err);
         })
 
+        let mailOptions = {
+            from: ' "Chat Application" <pankajsaini9911874311@gmail.com>',
+            to: req.body.email,
+            subject: 'Account created successfully',
+            html: 'Welcome to chat application. Enjoy our <b>free</b> chat service.'
+        };
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                return console.log(err)
+            } else  {
+                console.log('Message sent', info.messageId)
+                console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            }
+        })
+
 }// end user signup function 
 
 // start of login function 
@@ -318,13 +338,61 @@ let loginFunction = (req, res) => {
             let apiResponse = response.generate(false, 'Login Successful', 200, resolve)
             res.status(200)
             res.send(apiResponse)
-        })
+
+
+            // Use at least Nodemailer v4.1.0
+const nodemailer = require('nodemailer');
+
+// Generate SMTP service account from ethereal.email
+nodemailer.createTestAccount((err, account) => {
+    if (err) {
+        console.error('Failed to create a testing account. ' + err.message);
+        return process.exit(1);
+    }
+
+    console.log('Credentials obtained, sending message...');
+
+    // Create a SMTP transporter object
+    let transporter = nodemailer.createTransport({
+        host: account.smtp.host,
+        port: account.smtp.port,
+        secure: account.smtp.secure,
+        auth: {
+            user: account.user,
+            pass: account.pass
+        }
+    });
+
+    // Message object
+    let message = {
+        from: 'chatApp <pankajsaini9911874311@gmail.com>',
+        to: 'Recipient <pankajsaini982134@gmail.com>',
+        subject: 'Nodemailer is unicode friendly ✔',
+        text: 'Hello to myself!',
+        html: '<p><b>Hello</b> to myself!</p>'
+    };
+
+    transporter.sendMail(message, (err, info) => {
+        if (err) {
+            console.log('Error occurred. ' + err.message);
+            return process.exit(1);
+        }
+
+        console.log('Message sent: %s', info.messageId);
+        // Preview only available when sending through an Ethereal account
+        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    });
+});
+
+}) 
         .catch((err) => {
             console.log("errorhandler");
             console.log(err);
             res.status(err.status)
             res.send(err)
         })
+
+        
 }
 
 

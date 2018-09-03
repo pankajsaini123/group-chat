@@ -4,7 +4,7 @@ appConfig.port = 3000;
 appConfig.allowedCorsOrigin = "*";
 appConfig.env = "dev";
 appConfig.db = {
-    uri: 'mongodb://127.0.0.1:27017/chatAppDB'
+    uri: 'mongodb://127.0.0.1:27017/groupChatDB'
   }
 appConfig.apiVersion = '/api/v1';
 
