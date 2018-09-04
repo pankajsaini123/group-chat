@@ -85,26 +85,101 @@ let deleteUser = (req, res) => {
 
 }// end delete user
 
-let editUser = (req, res) => {
+let resetPassword = (req, res) => {
+    
+    let findUser = () => {
+        return new Promise((resolve, reject) => {
+            if (req.body.email && req.body.password) {
+                UserModel.findOne({ email: req.body.email }).exec((err, result) => {
+                    if (err) {
+                        logger.error('Error', 'usercontroller: resetPassword', 10)
+                        let apiResponse = response.generate( true, 'Database Error', 500, null)
+                        reject(apiResponse)
+                    } else if(check.isEmpty(result)) {
+                        logger.error('user not found', 'usercontroller: resetPassword', 10)
+                        let apiResponse = response.generate( true, 'No user found', 500, null)
+                        reject(apiResponse)
+                    } else {
+                        console.log(result)
+                        resolve(result)
+                    }
+                })
+            } else {
+                logger.error('one or more parameter missing', 'userController: resetPassword', 400)
+                let apiResponse = response.generate(true, 'Email or password is missing', 400, null)
+                reject(apiResponse)
+            }
+        })
+    } // end  of findUser
+    
 
-    let options = req.body;
-    options.password = passwordLib.hashpassword(req.body.password)
-    UserModel.update({ 'userId': req.params.userId }, options).exec((err, result) => {
-        if (err) {
-            console.log(err)
-            logger.error(err.message, 'User Controller:editUser', 10)
-            let apiResponse = response.generate(true, 'Failed To edit user details', 500, null)
-            res.send(apiResponse)
-        } else if (check.isEmpty(result)) {
-            logger.info('No User Found', 'User Controller: editUser')
-            let apiResponse = response.generate(true, 'No User Found', 404, null)
-            res.send(apiResponse)
-        } else {
-            let apiResponse = response.generate(false, 'User details edited', 200, result)
-            res.send(apiResponse)
+    let updatePassword = (result) => {
+        return new Promise((resolve, reject) => {
+                    UserModel.findOne({ email: req.body.email }).exec((err, userDetails) => {
+                        if (err) {
+                            logger.error('Error', 'usercontroller: updatePassword', 10)
+                            let apiResponse = response.generate( true, 'Database Error', 500, null)
+                            reject(apiResponse)
+                        }  else  {
+                            userDetails.password = passwordLib.hashpassword(req.body.password)
+                            userDetails.save()
+                            
+                            logger.info('password updated successfully', 'userController: updatePassord', 500)
+                            let finalDetails = userDetails.toObject()
+                            delete finalDetails.password,
+                            delete finalDetails.__v,
+                            delete finalDetails._id
+                            resolve(finalDetails)
+                        }   
+                    })
+        })
+    }
+
+    findUser(req, res)
+       .then(updatePassword)
+       .then((resolve) => {
+        
+        console.log(resolve)
+        let apiResponse = response.generate(false, 'Password Updates Success', 200, resolve)
+        res.send(apiResponse)
+
+
+
+    // sending mail after completing main thread
+    console.log('Credentials obtained, sending message...');
+    // Create a SMTP transporter object
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: 'tempmailidtempmailid@gmail.com',
+            pass: 'tempmail@123'
         }
-    });// end user model update
+    });
 
+    // Message object
+    let message = {
+        from: 'tempmailidtempmailid@gmail.com',
+        to: req.body.email,
+        subject: 'Chat Application',
+        text: 'Hello to myself!',
+        html: '<p>Your Password has been changed succcessfully.</p><br><br><b>If it\'s not done by you, Please contact our support as soon as posssible.</b>'
+    };
+
+    transporter.sendMail(message, (err, info) => {
+        if (err) {
+            console.log('Error occurred. ' + err.message);
+            return process.exit(1);
+        }
+        console.log('Message sent: %s', info.messageId);
+        
+    });
+       })
+       .catch((err) => {
+        console.log(err);
+        res.send(err);
+    })
 
 }// end edit user
 
@@ -398,7 +473,7 @@ module.exports = {
 
     signUpFunction: signUpFunction,
     getAllUser: getAllUser,
-    editUser: editUser,
+    resetPassword: resetPassword,
     deleteUser: deleteUser,
     getSingleUser: getSingleUser,
     loginFunction: loginFunction,
