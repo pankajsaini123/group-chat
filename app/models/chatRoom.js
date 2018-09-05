@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 
+
 const Schema = mongoose.Schema
 
 let chatGroupSchema = new Schema({
@@ -9,7 +10,7 @@ let chatGroupSchema = new Schema({
         unique: true,
         required: true,
     },
-    chatGroupName: {
+    chatGroupTitle: {
         type: String,
         default: ''
     },
@@ -20,7 +21,7 @@ let chatGroupSchema = new Schema({
     adminId: {
         type: String,
         default: ''
-    },
+    }, 
     isActive: {
         type: Boolean,
         default: false

@@ -33,6 +33,8 @@ let isAuthorized = (req, res, next) => {
             else{
                 
                 req.user = {userId: decoded.data.userId}
+                //console.log(req.user)
+                
                 next()
             }
 
