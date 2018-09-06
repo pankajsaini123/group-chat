@@ -14,9 +14,11 @@ module.exports.setRouter = (app) => {
 
     app.get(`${baseUrl}/getGroup/:groupId`, auth.isAuthorized, chatRoomController.getSingleGroup)
 
-    //app.get(`${baseUrl}/active/:userId`, auth.isAuthorized, chatRoomController.getActiveGroup)
+    app.get(`${baseUrl}/active/:userId`, auth.isAuthorized, chatRoomController.getActiveGroup)
 
-    //app.put(`${baseUrl}/edit/:groupId`, auth.isAuthorized, chatRoomController.editGroup)
+    app.put(`${baseUrl}/deactive/:groupId`, auth.isAuthorized, chatRoomController.deActiveGroup)
+
+    app.put(`${baseUrl}/edit/:groupId`, auth.isAuthorized, chatRoomController.editGroup)
 
     app.post(`${baseUrl}/delete/:groupId`, auth.isAuthorized, chatRoomController.deleteGroup)
 }

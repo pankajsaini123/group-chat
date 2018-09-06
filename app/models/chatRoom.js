@@ -24,17 +24,17 @@ let chatGroupSchema = new Schema({
     }, 
     isActive: {
         type: Boolean,
-        default: false
+        default: true
     },
     isMember: {
         type: Boolean,
         default: false
     },
-    status: {
+    /* status: {
         type: String,
         default: 'active'
     },
-
+ */
     messageList: [],
 
     createdOn: {
