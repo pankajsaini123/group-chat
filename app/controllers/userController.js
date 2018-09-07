@@ -17,6 +17,9 @@ const mail = require('./../libs/generateMail')
 /* Models */
 const UserModel = mongoose.model('User')
 
+var events = require('events');
+var eventEmitter = new events.EventEmitter();
+
 
 
 /* Get all user Details */
@@ -153,6 +156,13 @@ let resetPassword = (req, res) => {
 }// end edit user
 
 
+// listening eventEmitter to generate welcome mail to the user
+eventEmitter.on('welcomeEmail', function(data) {
+    console.log("event emitter called")
+    console.log(data)
+    mail.generateMail(data.mail, data.name, 'Welcome to our chat application. We are always ready to serve you better.')
+   
+})
 // start user signup function 
 
 let signUpFunction = (req, res) => {
@@ -222,8 +232,17 @@ let signUpFunction = (req, res) => {
             delete resolve.password
             let apiResponse = response.generate(false, 'User created', 200, resolve)
             res.send(apiResponse)
-            let name = req.body.firstName + req.body.lastName
-            mail.generateMail(req.body.email, name, 'Welcome to our chat application. We are always ready to serve you better.')
+
+
+            let name = req.body.firstName + " "+ req.body.lastName
+            //mail.generateMail(req.body.email, name, 'Welcome to our chat application. We are always ready to serve you better.')
+            let data = {
+                mail: req.body.email,
+                name: name
+            }
+            eventEmitter.emit('welcomeEmail',  data)   // emitting asynchronous event to make response faster 
+        
+        
  })
         .catch((err) => {
             console.log(err);
