@@ -11,6 +11,7 @@ const AuthModel = mongoose.model('Auth')
 
 /** nodemailer for sending mails on user signup */
 const nodemailer = require('nodemailer')
+const mail = require('./../libs/generateMail')
 
 
 /* Models */
@@ -142,39 +143,7 @@ let resetPassword = (req, res) => {
         console.log(resolve)
         let apiResponse = response.generate(false, 'Password Updates Success', 200, resolve)
         res.send(apiResponse)
-
-
-
-    // sending mail after completing main thread
-    console.log('Credentials obtained, sending message...');
-    // Create a SMTP transporter object
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: 'tempmailidtempmailid@gmail.com',
-            pass: 'tempmail@123'
-        }
-    });
-
-    // Message object
-    let message = {
-        from: 'tempmailidtempmailid@gmail.com',
-        to: req.body.email,
-        subject: 'Chat Application',
-        text: 'Hello to myself!',
-        html: '<p>Your Password has been changed succcessfully.</p><br><br><b>If it\'s not done by you, Please contact our support as soon as posssible.</b>'
-    };
-
-    transporter.sendMail(message, (err, info) => {
-        if (err) {
-            console.log('Error occurred. ' + err.message);
-            return process.exit(1);
-        }
-        console.log('Message sent: %s', info.messageId);
-        
-    });
+        mail.passwordChanged(req.body.email,"<p>Hii!!,<br><p>You password has been changed successfully.</p><br><br><b>Thanks</b>")
        })
        .catch((err) => {
         console.log(err);
@@ -253,38 +222,8 @@ let signUpFunction = (req, res) => {
             delete resolve.password
             let apiResponse = response.generate(false, 'User created', 200, resolve)
             res.send(apiResponse)
-
-
-// sending mail after completing main thread
-    console.log('Credentials obtained, sending message...');
-    // Create a SMTP transporter object
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: 'tempmailidtempmailid@gmail.com',
-            pass: 'tempmail@123'
-        }
-    });
-
-    // Message object
-    let message = {
-        from: 'tempmailidtempmailid@gmail.com',
-        to: req.body.email,
-        subject: 'Chat Application',
-        text: 'Hello to myself!',
-        html: '<p>Welcome!! to our chat application. We are always ready to serve you.</p><br><br><br><p><b>Thanks</b><br>Regards<br>Chat App Team</p>'
-    };
-
-    transporter.sendMail(message, (err, info) => {
-        if (err) {
-            console.log('Error occurred. ' + err.message);
-            return process.exit(1);
-        }
-        console.log('Message sent: %s', info.messageId);
-        
-    });
+            let name = req.body.firstName + req.body.lastName
+            mail.generateMail(req.body.email, name, 'Welcome to our chat application. We are always ready to serve you better.')
  })
         .catch((err) => {
             console.log(err);
