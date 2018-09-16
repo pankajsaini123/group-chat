@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer')
 let generateMail = (email, name, bodyMessage) => {
 
 // sending mail after completing main thread
-console.log('Credentials obtained, sending message...');
+console.log('signUp mail Credentials obtained, sending message...');
 
 // Create a SMTP transporter object
    const transporter = nodemailer.createTransport({
@@ -77,7 +77,8 @@ let passwordChanged = (email, bodyMessage) => {
 let generateVerifyCode = (email, name, verificationCode) => {
 
     // sending mail after completing main thread
-    console.log('Credentials obtained, sending message...');
+    console.log('verifying code Credentials obtained, sending message...');
+    // console.log("email" + email+ "receipient name" + name + "verification code"+ verificationCode)
     
     // Create a SMTP transporter object
        const transporter = nodemailer.createTransport({
@@ -96,7 +97,7 @@ let generateVerifyCode = (email, name, verificationCode) => {
            to: email,
            subject: 'Chat Application',
            text: 'Verification Code!',
-           html: "<p>Hii!!"+ name + ".<br>" + "Hope you are enjoying our service.<br><br>Your verification code is "+verificationCode+"."
+           html: "<p>Hii!!  <b>"+ name + "</b>.<br>" + "Hope you are enjoying our service.<br><br>Your verification code is <b>"+verificationCode+"</b>."
        };
     
        transporter.sendMail(message, (err, info) => {

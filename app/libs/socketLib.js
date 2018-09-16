@@ -19,7 +19,9 @@ const redisLib = require("./redisLib");
 
 let setServer = (server) => {
 
-    //let allOnlineUsers = []
+    let allOnlineUsers = []
+
+    let groupOnlineRoomsAndUsers = {}
 
     let io = socketio.listen(server);
 
@@ -47,49 +49,52 @@ let setServer = (server) => {
                     // setting socket user id 
                     socket.userId = currentUser.userId
                     let fullName = `${currentUser.firstName} ${currentUser.lastName}`
-                    let key = currentUser.userId
-                    let value = fullName
-
-                    let setUserOnline = redisLib.setANewOnlineUserInHash("onlineUsers", key, value, (err, result) => {
-                        if (err) {
-                            console.log(`some error occurred`)
-                        } else {
-                            // getting online users list.
-
-                            redisLib.getAllUsersInAHash('onlineUsers', (err, result) => {
-                                console.log(`--- inside getAllUsersInAHash function ---`)
-                                if (err) {
-                                    console.log(err)
-                                } else {
-
-                                    console.log(`${fullName} is online`);
-                                    // setting room name
-                                    socket.room = 'edChat'
-                                    // joining chat-group room.
-                                    socket.join(socket.room)
-                                    socket.to(socket.room).broadcast.emit('online-user-list', result);
+                   
+                    socket.fullName = fullName
+                    let userObj = { userId:currentUser.userId, fullName:fullName }
+                    allOnlineUsers.push(userObj)
 
 
-                                }
-                            })
+
+                    console.log(allOnlineUsers)
+                    socket.emit('online-user-list', allOnlineUsers)
+
+
+                    
+                    
+
+                
                         }
-                    })
-
-
-
-                    // let userObj = {userId:currentUser.userId,fullName:fullName}
-                    // allOnlineUsers.push(userObj)
-                    // console.log(allOnlineUsers)
-
-
-
-
-                }
-
-
-            })
+                    })             
 
         }) // end of listening set-user event
+
+        console.log(Object.keys(groupOnlineRoomsAndUsers))
+        socket.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers))
+
+
+
+        socket.on('create-room', (roomName) => {
+            console.log("roomName ============> " + roomName )
+            
+            socket.room = roomName;
+            groupOnlineRoomsAndUsers[socket.room] = new Array()
+            groupOnlineRoomsAndUsers[socket.room].push(this.userObj)
+            console.log("group Online users")
+            console.log(groupOnlineRoomsAndUsers[socket.room] )
+            console.log('=====================')
+            socket.join(socket.room)
+            socket.to(socket.room).broadcast.emit('group-online-users', groupOnlineRoomsAndUsers[socket.room])
+
+            console.log(Object.keys(groupOnlineRoomsAndUsers))
+            socket.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers))
+            
+
+        })
+
+
+        
+
 
 
         socket.on('disconnect', () => {

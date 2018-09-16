@@ -19,10 +19,12 @@ module.exports.setRouter = (app) => {
 
     app.post(`${baseUrl}/login`, userController.loginFunction);
 
-    app.put(`${baseUrl}/:userId/forgot`, auth.isAuthorized, userController.resetPassword);
+    app.post(`${baseUrl}/sendVerificationCode`, userController.sendVerificationCode)
+
+    app.put(`${baseUrl}/forgot`, userController.resetPassword);
 
     app.post(`${baseUrl}/:userId/delete`, auth.isAuthorized, userController.deleteUser);    
 
-    app.post(`${baseUrl}/logout`, auth.isAuthorized, userController.logout);
+    app.post(`${baseUrl}/:userId/logout`, auth.isAuthorized, userController.logout);
 
 }

@@ -93,8 +93,9 @@ let resetPassword = (req, res) => {
     
     let findUser = () => {
         return new Promise((resolve, reject) => {
-            if (req.body.email && req.body.password) {
-                UserModel.findOne({ email: req.body.email }).exec((err, result) => {
+            if (req.body.email && req.body.password && req.body.verificationCode) {
+                UserModel.findOne( { $and: [{ email: req.body.email }, {userId: req.body.verificationCode } ] } )
+                .exec((err, result) => {
                     if (err) {
                         logger.error('Error', 'usercontroller: resetPassword', 10)
                         let apiResponse = response.generate( true, 'Database Error', 500, null)
@@ -391,9 +392,9 @@ let loginFunction = (req, res) => {
             res.send(apiResponse)
 })
         .catch((err) => {
-            console.log("errorhandler");
+            //console.log("errorhandler");
             console.log(err);
-            res.status(err.status)
+            //res.status(err.status)
             res.send(err)
         })
 
@@ -404,13 +405,52 @@ let loginFunction = (req, res) => {
 
 // end of the login function 
 
+eventEmitter.on('sendVerificationCode', function(data) {
+    console.log("sendVerificationCode event emitter called")
+    console.log(data)
+    mail.generateVerifyCode(data.mail, data.name, data.verificationCode)
+   
+})
+// send verification code
+
+let sendVerificationCode = (req, res) => {
+        console.log(req.body.email)
+    UserModel.findOne({ email: req.body.email })
+    .exec((err, userDetails) => {
+        if (err) {
+            logger.error(err.message, 'userController: sendVerificationCode', 10)
+            let apiResponse = response.generate( true, 'Database error', '500', null)
+            res.send(apiResponse)
+        } else if (check.isEmpty(userDetails)) {
+            console.log(userDetails)
+            let apiResponse = response.generate( true, 'No user Found', 404, null)
+            res.send(apiResponse)
+        } else {
+            console.log("userDetails ====> "+ userDetails)
+            logger.info('user found', 'userController: sendVerificationCode', 200, userDetails)
+            let apiResponse = response.generate( false, 'Verification Code sent to your mail', 200, 'Success')
+            res.send(apiResponse)
+
+            let name = userDetails.firstName + " "+ userDetails.lastName
+            //mail.generateMail(req.body.email, name, 'Welcome to our chat application. We are always ready to serve you better.')
+            let data = {
+                mail: req.body.email,
+                name: name,
+                verificationCode: userDetails.userId
+            }
+            eventEmitter.emit('sendVerificationCode', data)
+        }
+    })
+
+}
+
 
 /**
  * function to logout user.
  * auth params: userId.
  */
 let logout = (req, res) => {
-  AuthModel.findOneAndDelete({userId: req.user.userId}, (err, result) => {
+  AuthModel.findOneAndDelete({userId: req.params.userId}, (err, result) => {
     if (err) {
         console.log(err)
         logger.error(err.message, 'user Controller: logout', 10)
@@ -431,6 +471,7 @@ module.exports = {
 
     signUpFunction: signUpFunction,
     getAllUser: getAllUser,
+    sendVerificationCode: sendVerificationCode,
     resetPassword: resetPassword,
     deleteUser: deleteUser,
     getSingleUser: getSingleUser,
