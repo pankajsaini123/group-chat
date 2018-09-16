@@ -51,7 +51,7 @@ let setServer = (server) => {
                     let fullName = `${currentUser.firstName} ${currentUser.lastName}`
                    
                     socket.fullName = fullName
-                    let userObj = { userId:currentUser.userId, fullName:fullName }
+                    let userObj = { userId:socket.userId, fullName:fullName }
                     allOnlineUsers.push(userObj)
 
 
@@ -70,7 +70,7 @@ let setServer = (server) => {
         }) // end of listening set-user event
 
         console.log(Object.keys(groupOnlineRoomsAndUsers))
-        socket.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers))
+        myIo.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers))
 
 
 
@@ -87,14 +87,42 @@ let setServer = (server) => {
             socket.to(socket.room).broadcast.emit('group-online-users', groupOnlineRoomsAndUsers[socket.room])
 
             console.log(Object.keys(groupOnlineRoomsAndUsers))
-            socket.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers))
+            myIo.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers))
             
 
         })
 
+        socket.on('editRoom', (editedRoomData) => {
+            
+            console.log("edited room called")
+            console.log(editedRoomData)
+            socket.leave(socket.room)
+            //socket.emit('disconnect')
+
+
+            delete groupOnlineRoomsAndUsers[socket.room]
+            console.log(groupOnlineRoomsAndUsers)
+
+
+            socket.room = editedRoomData.newRoomName
+
+            //delete this.groupOnlineUserList[editedRoomData.currentRoomName]
+            groupOnlineRoomsAndUsers[socket.room] = new Array()
+            groupOnlineRoomsAndUsers[socket.room].push(this.userObj)
+
+            console.log(socket.room)
+            socket.join(socket.room)
+            socket.to(socket.room).broadcast.emit('group-online-users', groupOnlineRoomsAndUsers[socket.room])
+        
+            console.log(Object.keys(groupOnlineRoomsAndUsers))
+            myIo.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers))
+        
+            /* console.log("edited room name list")
+            console.log(this.groupOnlineRoomsAndUsers) */
+        })
+
 
         
-
 
 
         socket.on('disconnect', () => {
@@ -105,33 +133,28 @@ let setServer = (server) => {
             console.log("user is disconnected");
             // console.log(socket.connectorName);
             console.log(socket.userId);
-
-
-            // var removeIndex = allOnlineUsers.map(function (user) { return user.userId; }).indexOf(socket.userId);
-            // allOnlineUsers.splice(removeIndex, 1)
-            // console.log(allOnlineUsers)
+            //socket.emit('valueForJoin',0);
+           // socket.to(socket.room).broadcast.emit('leftRoom',socket.fullName); 
             
-            if (socket.userId) {
-                redisLib.deleteUserFromHash('onlineUsers', socket.userId)
-                redisLib.getAllUsersInAHash('onlineUsers', (err, result) => {
-                    if (err) {
-                        console.log(err)
-                    } else {
-                        socket.leave(socket.room)
-                        socket.to(socket.room).broadcast.emit('online-user-list', result);
+            /* if(socket.room!=undefined){ 
+            var removeIndex = groupOnlineRoomsAndUsers[socket.room].map(function(user) { return user.userId; }).indexOf(socket.userId);
+            groupOnlineRoomsAndUsers[socket.room].splice(removeIndex,1)
 
+            //deleting room from array if no user exist in room
+            if(groupOnlineRoomsAndUsers[socket.room].length==0)
+                delete groupOnlineRoomsAndUsers[socket.room]}
+            //listing rooms and users
+            console.log(groupOnlineRoomsAndUsers)
 
-                    }
-                })
-            }
+            //listing room names
+            console.log(Object.keys(groupOnlineRoomsAndUsers));
+            var removeIndex = allOnlineUsers.map(function(user) { return user.userId; }).indexOf(socket.userId);
+            allOnlineUsers.splice(removeIndex,1)
+            console.log(allOnlineUsers) */
 
-
-
-
-
-
-
-
+            socket.to(socket.room).broadcast.emit('online-user-list',groupOnlineRoomsAndUsers[socket.room]);
+            socket.broadcast.emit('allRooms',Object.keys(groupOnlineRoomsAndUsers))
+            socket.leave(socket.room)
 
         }) // end of on disconnect
 
@@ -158,10 +181,6 @@ let setServer = (server) => {
             socket.to(socket.room).broadcast.emit('typing', fullName);
 
         });
-
-
-
-
     });
 
 }
@@ -202,7 +221,10 @@ eventEmitter.on('save-chat', (data) => {
 
 }); // end of saving chat.
 
-///redis code 
+
+
+
+
 
 
 
