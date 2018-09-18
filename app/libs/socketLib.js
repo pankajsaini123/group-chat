@@ -45,7 +45,7 @@ let setServer = (server) => {
                 else {
 
                     console.log("user is verified..setting details");
-                    var currentUser = user.data;
+                    let currentUser = user.data;
 
                     // setting socket user id 
                     socket.userId = currentUser.userId
@@ -65,10 +65,10 @@ let setServer = (server) => {
             socket.on('create-room', (roomName) => {
             console.log("roomName ============> " + roomName )
 
-            if (socket.room != undefined) {
+             if (socket.room) {
 
             socket.emit('disconnect') 
-        }
+            } 
        
 
             socket.room = roomName;
@@ -104,8 +104,8 @@ let setServer = (server) => {
 
         }) // end of listening set-user event
 
-        /* console.log(Object.keys(groupOnlineRoomsAndUsers))
-        myIo.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers)) */
+        console.log(Object.keys(groupOnlineRoomsAndUsers))
+        myIo.emit('allRooms', Object.keys(groupOnlineRoomsAndUsers)) 
 
 
        
@@ -141,8 +141,16 @@ let setServer = (server) => {
 
 
         socket.on('switch-room', (joinRoomName) => {
+            console.log(socket.room)
+
             console.log(socket.fullName + "has left" + socket.room)
-            socket.emit('disconnect')
+
+
+            if (socket.room != undefined) {
+               // socket.emit('disconnect')
+               socket.leave(socket.room)
+            }
+
             socket.room = joinRoomName
             socket.join(socket.room)
             console.log(socket.fullName + "has joined" + socket.room)
@@ -151,6 +159,7 @@ let setServer = (server) => {
             socket.to(socket.room).broadcast.emit('joinedRoom', socket.fullName)
 
             let userObj = { userId: socket.userId, fullName: socket.fullName }
+            console.log(userObj)
 
             if(groupOnlineRoomsAndUsers[socket.room] != undefined){
                 groupOnlineRoomsAndUsers[socket.room].push(userObj);
@@ -184,28 +193,31 @@ let setServer = (server) => {
             //socket.emit('valueForJoin',0);
             socket.to(socket.room).broadcast.emit('leftRoom',socket.fullName); 
             
-            if ( socket.room != undefined ) {
+            if ( socket.room) {
 
-            var removeIndex = groupOnlineRoomsAndUsers[socket.room].map(function(user) { return user.userId }).indexOf(socket.userId);
-            groupOnlineRoomsAndUsers[socket.room].splice(removeIndex,1)
+           /*  var removeIndex = groupOnlineRoomsAndUsers[socket.room].map(function(user) { return user.userId }).indexOf(socket.userId);
+            groupOnlineRoomsAndUsers[socket.room].splice(removeIndex,1) */
 
             //deleting room from array if no user exist in room
-            if(groupOnlineRoomsAndUsers[socket.room].length == 0)
+             if(groupOnlineRoomsAndUsers[socket.room].length == 0)
                 delete groupOnlineRoomsAndUsers[socket.room]
 
+                socket.leave(socket.room)
+ 
             }
             //listing rooms and users
             console.log(groupOnlineRoomsAndUsers)
 
             //listing room names
             console.log(Object.keys(groupOnlineRoomsAndUsers));
-            var removeIndex = allOnlineUsers.map(function(user) { return user.userId; }).indexOf(socket.userId);
+            /* var removeIndex = allOnlineUsers.map(function(user) { return user.userId; }).indexOf(socket.userId);
             allOnlineUsers.splice(removeIndex,1)
-            console.log(allOnlineUsers) 
+            console.log(allOnlineUsers) */ 
 
-            socket.to(socket.room).broadcast.emit('online-user-list',groupOnlineRoomsAndUsers[socket.room]);
-            socket.broadcast.emit('allRooms',Object.keys(groupOnlineRoomsAndUsers))
-            socket.leave(socket.room)
+            socket.to(socket.room).broadcast.emit('group-online-users',groupOnlineRoomsAndUsers[socket.room]);
+            //socket.broadcast.emit('allRooms',Object.keys(groupOnlineRoomsAndUsers))
+            //socket.leave(socket.room)
+            //socket.disconnect()
 
         }) // end of on disconnect
 
