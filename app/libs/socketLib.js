@@ -259,13 +259,15 @@ let setServer = (server) => {
                 eventEmitter.emit('save-chat', data);
 
             }, 2000)
-            myIo.emit(data.receiverId, data)
+
+            socket.to(socket.room).broadcast.emit("msg-received", data)
 
         });
 
-        socket.on('typing', (fullName) => {
+        socket.on('i-am-typing', (data) => {
+            console.log(`${data.myName}  is typing`)
 
-            socket.to(socket.room).broadcast.emit('typing', fullName);
+            socket.to(socket.room).broadcast.emit('typing', data);
 
         });
     });
