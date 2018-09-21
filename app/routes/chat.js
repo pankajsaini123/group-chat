@@ -8,7 +8,10 @@ module.exports.setRouter = (app) => {
 
   let baseUrl = `${appConfig.apiVersion}/chat`;
 
-  /**
+ 
+  // params: senderId, receiverId, skip.
+  app.get(`${baseUrl}/get/for/user`, auth.isAuthorized, chatController.getUsersChat);
+   /**
    * @apiGroup chat
    * @apiVersion  1.0.0
    * @api {get} /api/v1/chat/get/for/user to get paginated chats of user.
@@ -51,11 +54,69 @@ module.exports.setRouter = (app) => {
       }
  */
 
-  // params: senderId, receiverId, skip.
-  app.get(`${baseUrl}/get/for/user`, auth.isAuthorized, chatController.getUsersChat);
 
   // params: chatRoom, skip.
   app.get(`${baseUrl}/get/for/group`, auth.isAuthorized, chatController.getGroupChat);
+    /**
+   * @apiGroup chat
+   * @apiVersion  1.0.0
+   * @api {get} /api/v1/chat/get/for/group to get paginated chats of group.
+   * 
+   * @apiParam {string} chatRoom roomName of group. (query params) (required)
+   * @apiParam {string} authToken authToken of user. (query params) (required)
+   * @apiParam {number} skip skip value for pagination. (query params) (optional)
+   *
+   * @apiSuccess {object} myResponse shows error status, message, http status code, data.
+   * 
+   * @apiSuccessExample {object} Success-Response:
+      {
+    "error": false,
+    "message": "All Group Chats Listed",
+    "status": 200,
+    "data": [
+        {
+            "senderName": "Deepak singh",
+            "senderId": "Zfu2gWJOd",
+            "message": "my name is pankj",
+            "chatRoom": "temp",
+            "seen": false,
+            "chatId": "I4e4jQBz1",
+            "createdOn": "2018-09-20T18:04:09.548Z",
+            "modifiedOn": "2018-09-20T18:04:11.618Z"
+        },
+        {
+            "senderName": "Deepak singh",
+            "senderId": "Zfu2gWJOd",
+            "message": "l",
+            "chatRoom": "temp",
+            "seen": false,
+            "chatId": "HfpzWPaYA",
+            "createdOn": "2018-09-20T18:04:20.932Z",
+            "modifiedOn": "2018-09-20T18:04:22.950Z"
+        },
+        {
+            "senderName": "pankaj singh",
+            "senderId": "-jzKDERxz",
+            "message": "kl",
+            "chatRoom": "temp",
+            "seen": false,
+            "chatId": "XkSvT-q8W",
+            "createdOn": "2018-09-20T18:04:27.761Z",
+            "modifiedOn": "2018-09-20T18:04:29.778Z"
+        }
+    ]
+}
+   @apiErrorExample {json} Error-Response:
+   *
+   *  {
+          "error": true,
+          "message": "No Chat Found",
+          "status": 404,
+          "data": null
+}
+ */
+
+
 
   
   // params: chatIdCsv.

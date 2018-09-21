@@ -194,7 +194,8 @@ let setServer = (server) => {
             // console.log(socket.connectorName);
             //console.log(socket.userId);
             //socket.emit('valueForJoin',0);
-            socket.to(socket.room).broadcast.emit('leftRoom',socket.fullName);
+            //socket.emit('leftRoom',socket.fullName);
+            //socket.to(socket.room).broadcast.emit('leftRoom',socket.fullName);
             console.log(socket.room +  '<================ socket.room') 
             
              if ( allOnlineUsers != undefined) {
@@ -247,6 +248,8 @@ let setServer = (server) => {
             socket.to(socket.room).broadcast.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
             }
             socket.leave(socket.room)
+            socket.emit('leftRoom',socket.fullName);
+            socket.to(socket.room).broadcast.emit('leftRoom',socket.fullName);
             //socket.disconnect()
                
 
