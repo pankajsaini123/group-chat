@@ -160,13 +160,22 @@ let setServer = (server) => {
 
         socket.on('deleteThisRoom', (roomName) => {
 
-            if (socket.room != undefined) {
-                socket.emit('disconnect')
-            }
-
+            
+           
+            socket.emit('disconnect')
             delete listOfRoomAndNames[roomName]
+             allOnlineUsers = []
+            //delete listOfRoomAndNames[socket.room].data.users
+            console.log(allOnlineUsers)
             console.log(`${roomName}  room is deleted`)
+            console.log(listOfRoomAndNames)
             myIo.emit('allRooms',  Object.keys(listOfRoomAndNames))
+            //socket.to(socket.room).broadcast.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
+            myIo.emit('online-user-list', allOnlineUsers)
+            socket.emit('online-user-list', allOnlineUsers)
+
+            socket.emit('room-deleted','' )
+            myIo.emit('room-deleted','' )
         
         })
 
@@ -292,8 +301,8 @@ let setServer = (server) => {
             console.log("switch room online user list")
             console.log(listOfRoomAndNames[socket.room].data)
             //socket.to(socket.room).broadcast.emit('group-online-users', listOfRoomAndNames[socket.room])
-            socket.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
-            socket.to(socket.room).broadcast.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
+            socket.emit('online-user-list', allOnlineUsers)
+            socket.to(socket.room).broadcast.emit('online-user-list', allOnlineUsers)
 
             console.log(Object.keys(listOfRoomAndNames))
             myIo.emit('allRooms', Object.keys(listOfRoomAndNames))
