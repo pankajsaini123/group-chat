@@ -11,6 +11,28 @@ const response = require('./../libs/responseLib')
 
 const chatGroupModel = mongoose.model('chatGroup')
 
+let getAllGroup = (req, res) => {
+    chatGroupModel.find()
+        .select(' -__v -_id')
+        .lean()
+        .exec((err, result) => {
+            if (err) {
+                console.log(err)
+                logger.error(err.message, 'chatGroup Controller: getAllUser', 10)
+                let apiResponse = response.generate(true, 'Failed To Find groups Details', 500, null)
+                res.send(apiResponse)
+            } else if (check.isEmpty(result)) {
+                logger.info('No group Found', 'chatGroup Controller: getAllGroup')
+                let apiResponse = response.generate(true, 'No Group Found', 404, null)
+                res.send(apiResponse)
+            } else {
+                let apiResponse = response.generate(false, 'All Groups', 200, result)
+                res.send(apiResponse)
+            }
+        })
+}// end get all users
+
+
 
 let createGroup = (req, res) => {
     chatGroupModel.findOne({ chatGroupTitle: req.body.title }).exec((err, result) => {
@@ -27,9 +49,9 @@ let createGroup = (req, res) => {
 
                 chatGroupId : shortid.generate(),
                 chatGroupTitle: req.body.title,
-                adminName: req.body.adminName,
-                adminId: req.body.id,                 
-                isMember: true,
+                //adminName: req.body.adminName,
+                //adminId: req.body.id,                 
+                //isMember: true,
                 createdOn: time.convertToLocalTime(),
                 lastModified: time.convertToLocalTime()
             })
@@ -107,7 +129,7 @@ let getSingleGroup = (req, res) => {
 }
 
 let deleteGroup = (req, res) => {
-    chatGroupModel.remove({ chatGroupId: req.params.groupId })
+    chatGroupModel.findOneAndRemove({ chatGroupTitle : req.body.title })
     .select('-_id -__v')
     .lean()
     .exec((err, groupDetails) => {
@@ -208,6 +230,7 @@ let deActiveGroup = (req, res) => {
 
 
 module.exports = {
+    getAllGroup: getAllGroup,
     createGroup: createGroup,
     getUserGroups: getUserGroups,
     getSingleGroup: getSingleGroup,

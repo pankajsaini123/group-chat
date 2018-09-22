@@ -14,23 +14,23 @@ let chatGroupSchema = new Schema({
         type: String,
         default: ''
     },
-    adminName: {
+   /*  adminName: {
         type: String,
         default: ''
     },
     adminId: {
         type: String,
         default: ''
-    }, 
+    }, */ 
     isActive: {
         type: Boolean,
         default: true
     },
-    isMember: {
+  /*  isMember: {
         type: Boolean,
         default: false
     },
-    /* status: {
+     status: {
         type: String,
         default: 'active'
     },

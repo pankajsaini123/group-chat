@@ -72,7 +72,7 @@ let setServer = (server) => {
 
 
             // create new room
-            socket.on('create-room', (roomName) => {
+             socket.on('create-room', (roomName) => {
             console.log("roomName ============> " + roomName )
 
             if (socket.room != undefined) {
@@ -82,7 +82,7 @@ let setServer = (server) => {
        
 
             socket.room = roomName;
-
+            console.log("socket room name" + socket.room)
             let groupName = socket.room
             //let users = []
             let userObj = { userId: socket.userId, fullName: socket.fullName }
@@ -99,10 +99,11 @@ let setServer = (server) => {
             if (listOfRoomAndNames[socket.room] != undefined ) {
                 //listOfRoomAndNames[socket.room] = []
 
-                listOfRoomAndNames[socket.room].push(groupName)
+                //listOfRoomAndNames[socket.room].push(groupName)
 
-                listOfRoomAndNames[socket.room][users] = new Array()
-                listOfRoomAndNames[socket.room][users].push(userObj)
+                //listOfRoomAndNames[socket.room][users] = new Array()
+                //listOfRoomAndNames[socket.room][users].push(userObj)
+                listOfRoomAndNames[socket.room]['data'] =  details
 
             } else {
             listOfRoomAndNames[socket.room] = new Object()
@@ -118,17 +119,18 @@ let setServer = (server) => {
 
 
             }
-            console.log("room created")
+            console.log("room created by socket io")
             console.log(listOfRoomAndNames)
-            console.log(listOfRoomAndNames)
-            console.log(listOfRoomAndNames[socket.room].data.users)
+            //console.log(listOfRoomAndNames)
+            console.log(allOnlineUsers)
 
             socket.join(socket.room)
 
 
             //console.log(listOfRoomAndNames[socket.room])
             //socket.to(socket.room).broadcast.emit('group-online-users', listOfRoomAndNames[socket.room])
-            socket.to(socket.room).broadcast.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
+            //socket.to(socket.room).broadcast.emit('joinedRoom', socket.fullName)
+            socket.to(socket.room).broadcast.emit('online-user-list', allOnlineUsers)
 
             //console.log(Object.keys(listOfRoomAndNames))
             //myIo.emit('allRooms', Object.keys(listOfRoomAndNames))
@@ -136,7 +138,7 @@ let setServer = (server) => {
             myIo.emit('allRooms',  Object.keys(listOfRoomAndNames))
             
 
-        })
+        }) 
                     
 
                 
@@ -144,6 +146,17 @@ let setServer = (server) => {
                     })             
 
         }) // end of listening set-user event
+
+
+
+       /*  socket.on('join-room', (data) => {
+            console.log('join-room called')
+            if (listOfRoomAndNames[data.roomName]) {
+                    let userObj = {userId: data.userId  , fullName: data.fullName}
+                    allOnlineUsers.push(userObj)
+            }
+            socket.to(socket.room).broadcast.emit('joinedRoom', data.fullName)
+        }) */
 
        /*  console.log(Object.keys(listOfRoomAndNames))
         myIo.emit('allRooms', Object.keys(listOfRoomAndNames))  */
@@ -171,7 +184,7 @@ let setServer = (server) => {
             console.log(listOfRoomAndNames)
             myIo.emit('allRooms',  Object.keys(listOfRoomAndNames))
             //socket.to(socket.room).broadcast.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
-            myIo.emit('online-user-list', allOnlineUsers)
+            //myIo.emit('online-user-list', allOnlineUsers)
             socket.emit('online-user-list', allOnlineUsers)
 
             socket.emit('room-deleted','' )
@@ -221,9 +234,12 @@ let setServer = (server) => {
              }
             
             //deleting room from array if no user exist in room
-            /*  if(listOfRoomAndNames[socket.room].length == 0)
-                delete listOfRoomAndNames[socket.room] 
-                */
+              /* if(listOfRoomAndNames[socket.room].length == 0)
+                delete listOfRoomAndNames[socket.room]  */
+                if (allOnlineUsers.length == 0) {
+                    delete listOfRoomAndNames[socket.room]
+                }
+                
 
                 
              
@@ -244,7 +260,7 @@ let setServer = (server) => {
             //socket.to(socket.room).broadcast.emit('group-online-users',listOfRoomAndNames[socket.room]);
             //socket.broadcast.emit('allRooms',Object.keys(listOfRoomAndNames))
             if ( listOfRoomAndNames[socket.room] != undefined) {
-            socket.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
+           // socket.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
             socket.to(socket.room).broadcast.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
             }
             socket.leave(socket.room)
@@ -350,6 +366,9 @@ let setServer = (server) => {
     mail.generateMail(tempData.mailReceiver, 'Buddy !  ', "Welcome to our chat application. Let\'s chat for free.<br><br> Use this link to connect<br><b>http://localhost:3000/chat/" + socket.room)
    
    })
+
+
+
 
     socket.on('invitaion-mail', (tempData) => {
     eventEmitter.emit('invitation-link', tempData)

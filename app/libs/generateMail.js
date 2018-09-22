@@ -68,6 +68,7 @@ let passwordChanged = (email, bodyMessage) => {
                return process.exit(1);
            }
            console.log('Message sent: %s', info.messageId);
+           console.log("=============================================")
            
        });
     }

@@ -7,6 +7,9 @@ const auth = require('../middlewares/auth')
 module.exports.setRouter = (app) => {
 
     let baseUrl = `${appConfig.apiVersion}/group`;
+
+    app.get(`${baseUrl}/all`, auth.isAuthorized, chatRoomController.getAllGroup)
+
     
     app.post(`${baseUrl}/create`, auth.isAuthorized, chatRoomController.createGroup)
 
@@ -20,5 +23,5 @@ module.exports.setRouter = (app) => {
 
     app.put(`${baseUrl}/edit/:groupId`, auth.isAuthorized, chatRoomController.editGroup)
 
-    app.post(`${baseUrl}/delete/:groupId`, auth.isAuthorized, chatRoomController.deleteGroup)
+    app.post(`${baseUrl}/delete`, auth.isAuthorized, chatRoomController.deleteGroup)
 }
