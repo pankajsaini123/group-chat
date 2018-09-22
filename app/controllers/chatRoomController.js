@@ -76,7 +76,7 @@ let createGroup = (req, res) => {
             })
         } else {
             logger.error('group already exist', 'chatRoomController: createGroup', 20)
-            let apiResponse = response.generate(true, 'group already exist', 403, null)
+            let apiResponse = response.generate(true, 'group already exist in database', 403, null)
             //resolve(apiResponse)
             res.send(apiResponse)
         }
@@ -181,7 +181,7 @@ let editGroup = (req, res) => {
     console.log('Inside edit group')
     let options = req.body
     console.log(options)
-    chatGroupModel.update({ chatGroupId: req.params.groupId }, options, { multi: true })
+    chatGroupModel.update({ chatGroupTitle: req.body.title }, options, { multi: true })
     .select('-_id -__v')
     .lean()
     .exec((err, result) => {
@@ -196,7 +196,7 @@ let editGroup = (req, res) => {
         } else {
             console.log(result)
             logger.info('Group edited Successfully', 'Group Controller:Edit Group', 4)
-            let apiResponse = response.generate(false, 'Edit Successful', 200, result)
+            let apiResponse = response.generate(false, 'Title changed', 200, result)
             res.send(apiResponse)
         }
     })
@@ -205,7 +205,7 @@ let editGroup = (req, res) => {
 let deActiveGroup = (req, res) => {
     console.log('Inside deactive group')
   
-    chatGroupModel.update({ chatGroupId: req.params.groupId }, { $set: { isActive: false } } )
+    chatGroupModel.update({ chatGroupTitle: req.body.title }, { $set: { isActive: false } } )
     .select('-_id -__v')
     .lean()
     .exec((err, result) => {

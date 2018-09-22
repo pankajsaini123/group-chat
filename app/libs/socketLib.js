@@ -170,6 +170,28 @@ let setServer = (server) => {
 
         })
 
+        socket.on('deActivateRoom', (data) => {
+            console.log('deactivate room called at socket io')
+            //console.log(data)
+            let roomName = data.roomName
+           socket.emit('disconnect')
+           delete listOfRoomAndNames[roomName]
+           allOnlineUsers = []
+          //delete listOfRoomAndNames[socket.room].data.users
+          console.log(allOnlineUsers)
+          console.log(`${roomName}  room is deleted`)
+          console.log(listOfRoomAndNames)
+          myIo.emit('allRooms',  Object.keys(listOfRoomAndNames))
+          //socket.to(socket.room).broadcast.emit('online-user-list', listOfRoomAndNames[socket.room].data.users)
+          //myIo.emit('online-user-list', allOnlineUsers)
+          socket.emit('online-user-list', allOnlineUsers)
+
+          myIo.emit('group-deactivated', roomName)
+
+          /* socket.emit('room-deleted','' )
+          myIo.emit('room-deleted','' ) */
+        })
+
 
         socket.on('deleteThisRoom', (roomName) => {
 
@@ -236,9 +258,9 @@ let setServer = (server) => {
             //deleting room from array if no user exist in room
               /* if(listOfRoomAndNames[socket.room].length == 0)
                 delete listOfRoomAndNames[socket.room]  */
-                if (allOnlineUsers.length == 0) {
+                /* if (allOnlineUsers.length == 0) {
                     delete listOfRoomAndNames[socket.room]
-                }
+                } */
                 
 
                 
@@ -330,7 +352,7 @@ let setServer = (server) => {
 
 
         
-
+     
 
         
 
