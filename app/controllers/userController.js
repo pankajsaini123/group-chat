@@ -102,7 +102,7 @@ let resetPassword = (req, res) => {
                         reject(apiResponse)
                     } else if(check.isEmpty(result)) {
                         logger.error('user not found', 'usercontroller: resetPassword', 10)
-                        let apiResponse = response.generate( true, 'No user found', 500, null)
+                        let apiResponse = response.generate( true, 'Invalid verification code', 500, null)
                         reject(apiResponse)
                     } else {
                         console.log(result)
