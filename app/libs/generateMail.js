@@ -14,7 +14,7 @@ console.log('signUp mail Credentials obtained, sending message...');
        secure: true,
        auth: {
            user: 'tempmailidtempmailid@gmail.com',
-           pass: 'tempmail@123'
+           pass: '********'
        }
  });
 
